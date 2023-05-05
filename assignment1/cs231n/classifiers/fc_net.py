@@ -55,7 +55,14 @@ class TwoLayerNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        W1 = np.random.normal(0, weight_scale, (input_dim, hidden_dim))
+        self.params['W1'] = W1
+        b1 = np.zeros((hidden_dim,))
+        self.params['b1'] = b1
+        W2 = np.random.normal(0, weight_scale, (hidden_dim, num_classes))
+        self.params['W2'] = W2
+        b2 = np.zeros((num_classes,))
+        self.params['b2'] = b2
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -88,7 +95,15 @@ class TwoLayerNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        W1 = self.params['W1']
+        b1 = self.params['b1']
+        W2 = self.params['W2']
+        b2 = self.params['b2']
+        
+        o1, c1 = affine_forward(X, W1, b1)
+        o1a, c1a = relu_forward(o1)
+        o2, c2 = affine_forward(o1a, W2, b2)
+        scores = o2
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -112,7 +127,28 @@ class TwoLayerNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        loss, o2_delta = softmax_loss(o2, y)
+        
+        loss += 0.5 * self.reg * (
+            np.sum(W1 * W1) +
+            #np.sum(b1 * b1) +
+            np.sum(W2 * W2) #+
+            #np.sum(b2 * b2)
+        )
+        
+        o1a_delta, W2_delta, b2_delta = affine_backward(o2_delta, c2)
+        o1_delta = relu_backward(o1a_delta, c1a)
+        X_delta, W1_delta, b1_delta = affine_backward(o1_delta, c1)
+        
+        W1_delta += self.reg * W1
+        #b1_delta += self.reg * b1
+        W2_delta += self.reg * W2
+        #b2_delta += self.reg * b2
+        
+        grads['W1'] = W1_delta
+        grads['b1'] = b1_delta
+        grads['W2'] = W2_delta
+        grads['b2'] = b2_delta
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
