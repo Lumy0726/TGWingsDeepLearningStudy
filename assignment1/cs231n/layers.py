@@ -28,7 +28,7 @@ def affine_forward(x, w, b):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    out = x.reshape(x.shape[0], -1).dot(w) + b
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -61,6 +61,16 @@ def affine_backward(dout, cache):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
+    x_ = x.reshape(x.shape[0], -1)
+    dx = np.sum(
+        np.expand_dims(w, axis=0) * np.expand_dims(dout, axis=1),
+        axis=2
+    ).reshape(x.shape)
+    dw = np.sum(
+        np.expand_dims(x_, axis=2) * np.expand_dims(dout, axis=1),
+        axis=0
+    )
+    db = np.sum(dout, axis=0) # * 1
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -87,6 +97,8 @@ def relu_forward(x):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
+    out = np.array(x)
+    out[out<0]=0
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -114,6 +126,9 @@ def relu_backward(dout, cache):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
+    dx = np.zeros(x.shape)
+    dx[x>=0]=1
+    dx *= dout
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
