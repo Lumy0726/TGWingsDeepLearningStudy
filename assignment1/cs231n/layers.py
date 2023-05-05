@@ -788,7 +788,28 @@ def svm_loss(x, y):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    # derivative of 'loss value' with respect to 'score[i,j]' is (0 or 1 or '-lossAffectCount')
+
+    # compute the loss and the gradient
+    N = x.shape[0]
+    dx = np.zeros(x.shape)
+    loss = 0.0
+    margin = x + 1
+    correct_class_score = np.zeros((N, ))
+    margin[range(N),y] = correct_class_score = x[range(N),y]
+    margin -= correct_class_score.reshape(-1, 1)
+    margin[margin < 0] = 0
+    #loss value update
+    loss += margin.sum()
+    #Handle case: derivative of 'loss value' with respect to 'score[i,j]' is 1
+    dx[margin > 0] = 1
+    #Handle case: derivative of 'loss value' with respect to 'score[i,j]' is '-lossAffectCount'
+    dx_tmp = np.zeros(x.shape)
+    dx_tmp[range(N),y] = np.sum(dx, axis=1)
+    dx -= dx_tmp
+
+    loss /= N
+    dx /= N
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -818,7 +839,23 @@ def softmax_loss(x, y):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+
+    #NOTE: 'loss value' of 'score[i,j]' is (-ln(e^y / s)) or (ln(1+ze^(-y))), 'y' is 'score[i,y[i]]', 's' is sum of 'e^score[i]', 'z' is sum of 'e^score[i]' without 'score[i,y[i]]'.
+    # derivative of 'loss value' with respect to 'x=score[i,j]' is ((e^x)/s - 1) when j is correct class.
+    # derivative of 'loss value' with respect to 'x=score[i,j]' is ((e^x)/s) when j is not correct class.
+    #
+    # compute the loss and the gradient
+    N = x.shape[0]
+    loss = 0.0
+    e_score = np.exp(x - np.max(x, axis=1).reshape(-1,1))
+    sum_e_score = np.sum(e_score, axis=1)
+    loss -= np.sum(np.log(e_score[range(N),y] / sum_e_score))
+    tmp = np.zeros(x.shape)
+    tmp[range(N),y] = 1
+    dx = (e_score / sum_e_score.reshape(-1,1) - tmp)
+
+    loss /= N
+    dx /= N
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
